@@ -1,0 +1,21 @@
+title = valhallasw :: home
+valhallasw's toolshed
+=====================
+
+Current project:
+----------------
+* Preparations for the interwiki image search:
+  * mySQLdb abstraction layer:
+    Where other abstraction layers try to layer the sql output (making the commands sql server independent) or the input (making it easier to construct sql commands), I try to layer the commands. Instead of having to work through cursors, fetchalls etc, I just want to give a SQL command and have a list of [dictionaries][dictionary] returned to me.
+    The semi-abstract current source is:
+    <pre>cursor=self.db.cursor()
+     cursor.execute(commands)
+     cols=[x[0] for x in cursor.description()]
+     return=[dict(zip(cols,x)) for x in cursor.fetchall()]</pre>
+
+[dictionary]: http://docs.python.org/tut/node7.html#SECTION007500000000000000000
+
+
+
+Nothing to see here folks, please move on!
+(except a small [testing ground](test) for valhallasw himself ;))
