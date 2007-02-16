@@ -5,7 +5,6 @@ sys.path.append('..')
 
 import time, datetime
 import querier, wikipedia
-from useful import iter_islast
 
 wikipedia.setAction(u'Orphan-Overlegupdater van [[Gebruiker:Valhallasw]] ([[Gebruiker:Valhallasw/toolserver/bot|changelog]])')
 
