@@ -59,5 +59,5 @@ if time.localtime()[3] == 0:
 
 
 
-else:
-  print time.strftime("--not 00:00 yet. current time: %H:%M:%S") 
+#else:
+  #print time.strftime("--not 00:00 yet. current time: %H:%M:%S") 
