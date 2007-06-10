@@ -14,18 +14,7 @@ import wikipedia
 import itertools
 import catlib_ts
 import warnings
-
-#_bfunc = {}
-#def _backup(f):
-#    """ Decorator for backup functions. The backup functions are stored in the _bfunc dict
-#    """
-#    def new_f(*args, **kwds):
-#        if kwds.pop('original', False ):
-#            return _bfunc[f.func_name](*args, **kwds)
-#        else:
-#            return f(*args, **kwds)
-#    new_f.func_name = f.func_name
-#    return new_f
+import time
 
 ##############################-[ wikipedia.Site ]-##############################
 @monkeypatch.bak
@@ -224,26 +213,38 @@ def _wikipedia_Page_getRedirectTarget(self):
     except StopIteration:
         raise IsNotRedirectPage(self)
 
+@monkeypatch.bak
+def _wikipedia_Page_getVersionHistory(self, forceReload=False, reverseOrder=False, getAll=False, revCount=500):
+    if forceReload:
+        warn("forceReload is always true in a database...", DeprecationWarning)
+        
+    if reverseOrder:
+        generator = toolserver.Generators.getRevision(self, step=revCount, format='%d %b %Y %H:%M', sort="ORDER BY rev_id ASC")
+    else:
+        generator = toolserver.Generators.getRevision(self, step=revCount, format='%d %b %Y %H:%M')
+    
+    if not getAll:
+        generator = itertools.islice(generator, 0, revCount)
+    
+    return [(unicode(rev['revision']), rev['date'], rev['user'], '(' + rev['comment'] + ')') for rev in generator]
+
+
 patches = {
-            "wikipedia.Site.dbName"         : "_wikipedia_Site_dbName",  #            "wikipedia.Site.getEditPage"    : "_wikipedia_getEditPage",
-            "wikipedia.Page.permalink"      : "_wikipedia_Page_permalink",
-            "wikipedia.Page.latestRevision" : "_wikipedia_Page_latestRevision",
-            "wikipedia.Page.exists"         : "_wikipedia_Page_exists",
-            "wikipedia.Page.isRedirectPage" : "_wikipedia_Page_isRedirectPage",
-            "wikipedia.Page.isEmpty"        : "_wikipedia_Page_isEmpty",
-            "wikipedia.Page.botMayEdit"     : "_wikipedia_Page_botMayEdit",
-            "wikipedia.Page.getReferences"  : "_wikipedia_Page_getReferences",
-            "wikipedia.Page.interwiki"      : "_wikipedia_Page_interwiki",
-            "wikipedia.Page.categories"     : "_wikipedia_Page_categories",
-            "wikipedia.Page.linkedPages"    : "_wikipedia_Page_linkedPages",
-            "wikipedia.Page.imagelinks"     : "_wikipedia_Page_imagelinks",
-            "wikipedia.Page.templates"      : "_wikipedia_Page_templates",
-            "wikipedia.Page.templatePages"  : "_wikipedia_Page_templatePages"            
+            "wikipedia.Site.dbName"             : "_wikipedia_Site_dbName",  #            "wikipedia.Site.getEditPage"    : "_wikipedia_getEditPage",
+            "wikipedia.Page.permalink"          : "_wikipedia_Page_permalink",
+            "wikipedia.Page.latestRevision"     : "_wikipedia_Page_latestRevision",
+            "wikipedia.Page.exists"             : "_wikipedia_Page_exists",
+            "wikipedia.Page.isRedirectPage"     : "_wikipedia_Page_isRedirectPage",
+            "wikipedia.Page.isEmpty"            : "_wikipedia_Page_isEmpty",
+            "wikipedia.Page.botMayEdit"         : "_wikipedia_Page_botMayEdit",
+            "wikipedia.Page.getReferences"      : "_wikipedia_Page_getReferences",
+            "wikipedia.Page.interwiki"          : "_wikipedia_Page_interwiki",
+            "wikipedia.Page.categories"         : "_wikipedia_Page_categories",
+            "wikipedia.Page.linkedPages"        : "_wikipedia_Page_linkedPages",
+            "wikipedia.Page.imagelinks"         : "_wikipedia_Page_imagelinks",
+            "wikipedia.Page.templates"          : "_wikipedia_Page_templates",
+            "wikipedia.Page.templatePages"      : "_wikipedia_Page_templatePages"     
+            "wikipedia.Page.getVersionHistory"  : "_wikipedia_Page_getVersionHistory"    
           }
 
 monkeypatch.patch(patches, globals(), locals())
-#for p in patches:
-#    exec("if %(x)s.__name__ == '%(xs)s':\n  _bfunc['%(y)s'] = %(x)s\n  print '[b] Patching %(x)s...'\nelse:\n  print '[ ] Patching %(x)s...'"
-#        % {'x': p, 'xs': p.split('.')[-1], 'y': patches[p]}
-#        , globals(), locals())
-#    exec("%s = %s"           % (p, patches[p]), globals(), locals())

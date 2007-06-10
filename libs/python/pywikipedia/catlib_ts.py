@@ -9,26 +9,14 @@ Monkey patch script to use the toolserver for category-funkyness
 __version__ = '$Id$'
 #
 
+import monkeypatch
 import toolserver
 import wikipedia
 import catlib
 import itertools
 
-_bfunc = {}
-def _backup(f):
-
-    """ Decorator for backup functions. The backup functions are stored in the _bfunc dict
-    """
-    def new_f(*args, **kwds):
-        if kwds.pop('original', False ):
-            return _bfunc[f.func_name](*args, **kwds)
-        else:
-            return f(*args, **kwds)
-    new_f.func_name = f.func_name
-    return new_f
-
 #############################-[ catlib.Category ]-##############################
-@_backup
+@monkeypatch.bak
 def _catlib_Category__parseCategory(self, recurse = False, purge = False, startFrom = None):
     if not startFrom:
         startFrom = 0
@@ -60,11 +48,7 @@ patches =   {
                 "catlib.Category._parseCategory": "_catlib_Category__parseCategory"
             }
 
-for p in patches:
-    exec("if %(x)s.__name__ == '%(xs)s':\n  _bfunc['%(y)s'] = %(x)s\n  print '[b] Patching %(x)s...'\nelse:\n  print '[ ] Patching %(x)s...'"
-        % {'x': p, 'xs': p.split('.')[-1], 'y': patches[p]}
-        , globals(), locals())
-    exec("%s = %s"           % (p, patches[p]), globals(), locals())
+monkeypatch.patch(patches, globals(), locals())
                     
             
         
