@@ -16,7 +16,7 @@ def mainloop (site, namespace):
 
   #namespacepage = wikipedia.Page(wikipedia.getSite(site), wikipedia.input("Please give the namespace name:").rstrip(':') + ':');
   namespacepage = wikipedia.Page(wikipedia.getSite(site), namespace.rstrip(":")+':');
-  namespacetalkpage = namespacepage.switchTalkPage()
+  namespacetalkpage = namespacepage.toggleTalkPage()
   namespace = namespacepage.namespace();
   namespacetalk = namespacetalkpage.namespace();
   nsname = namespacepage.title()
