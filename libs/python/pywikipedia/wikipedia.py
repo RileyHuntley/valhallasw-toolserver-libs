@@ -537,7 +537,7 @@ class Page(object):
             output(u'Getting page %s' % self.aslink())
         path = self.site().edit_address(self.urlname())
         if oldid:
-            path = path + "&oldid="+oldid
+            path = path + "&oldid="+str(oldid)
         # Make sure Brion doesn't get angry by waiting if the last time a page
         # was retrieved was not long enough ago.
         if throttle:
@@ -1364,6 +1364,9 @@ class Page(object):
             thistxt = self.get()
         except IsRedirectPage:
             return []
+
+        comment = re.compile('<!--.*?-->', re.DOTALL)
+        thistxt = comment.sub('', thistxt)
 
         result = []
         Rtemplate = re.compile(r'{{(msg:)?(?P<name>[^\|]+?)(\|(?P<params>.+?))?}}', re.DOTALL)

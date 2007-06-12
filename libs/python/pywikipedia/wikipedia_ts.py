@@ -15,6 +15,7 @@ import itertools
 import catlib_ts
 import warnings
 import time
+import urllib
 
 ##############################-[ wikipedia.Site ]-##############################
 @monkeypatch.bak
@@ -29,16 +30,26 @@ def _wikipedia_Page_getEditPage(self, get_redirect=False, throttle=True, sysop=F
     """ Gets the source of a wiki page through WikiProxy
         TODO: finish (use permalink things in localhost/~daniel/WikiSense/WikiProxy.php
     """
-    isWatched = False
-    editRestriction = None
+    isWatched = False # mja, hoe gaan we dat checken?
+    editRestriction = None # toolserver.getEditRestriction etc.
+    
+    if not oldid:
+        oldid = self.latestRevision()
+    
+    data = {'wiki'  : self.site().hostname(),
+            'title' : self.sectionFreeTitle(),
+            'rev'   : oldid
+           }
+            
     if wikipedia.verbose:
-        wikipedia.output(u'Getting page %s' % self.aslink())
+        wikipedia.output(u'Getting revision %(rev)i of page %(title)s from %(wiki)s' % data)
     path = 'http://localhost/~daniel/WikiSense/WikiProxy.php'
-
-@monkeypatch.bak
-def _wikipedia_Page_permalink(self):
-    """ Get the permalink page for this page """
-    return "http://%s%s&oldid=%i" % (self.site().hostname(), self.site().get_address(self.title()), self.latestRevision())
+    
+    f = urllib.urlopen(path, urllib.urlencode(data))
+    if (throttle and not ('x-wikiproxy' in f.headers and f.headers['x-wikiproxy'] == 'hit')):
+        wikipedia.get_throttle()
+    
+    return (f.read(), False, None)
 
 @monkeypatch.bak
 def _wikipedia_Page_latestRevision(self):
@@ -54,7 +65,7 @@ def _wikipedia_Page_latestRevision(self):
             raise wikipedia.NoPage('No revisions found for page %%s' % self.__repr__())
         else:
             self._permalink = u'%i\n      ' % ret[0]['page_latest']
-    return self._permalink
+    return int(self._permalink)
 
 @monkeypatch.bak
 def _wikipedia_Page_exists(self):
@@ -228,10 +239,18 @@ def _wikipedia_Page_getVersionHistory(self, forceReload=False, reverseOrder=Fals
     
     return [(unicode(rev['revision']), rev['date'], rev['user'], '(' + rev['comment'] + ')') for rev in generator]
 
+def VersionHistoryGenerator(self):
+    for rev in toolserver.Generators.getRevision(self, step=1, format='%Y-%m-%dT%H:%M:%SZ', sort="ORDER BY rev_id ASC"):
+        print "Retrieving revision %i dated %s by %s" % (rev['revision'], rev['date'], rev['user'])
+        yield(rev['date'], rev['user'], self.getEditPage(get_redirect=True, oldid = rev['revision'] )[0])
+
+@monkeypatch.bak
+def _wikipedia_Page_fullVersionHistory(self):
+    return [entry for entry in VersionHistoryGenerator(self)]
 
 patches = {
-            "wikipedia.Site.dbName"             : "_wikipedia_Site_dbName",  #            "wikipedia.Site.getEditPage"    : "_wikipedia_getEditPage",
-            "wikipedia.Page.permalink"          : "_wikipedia_Page_permalink",
+            "wikipedia.Site.dbName"             : "_wikipedia_Site_dbName",
+            "wikipedia.Page.getEditPage"        : "_wikipedia_Page_getEditPage",
             "wikipedia.Page.latestRevision"     : "_wikipedia_Page_latestRevision",
             "wikipedia.Page.exists"             : "_wikipedia_Page_exists",
             "wikipedia.Page.isRedirectPage"     : "_wikipedia_Page_isRedirectPage",
@@ -243,8 +262,9 @@ patches = {
             "wikipedia.Page.linkedPages"        : "_wikipedia_Page_linkedPages",
             "wikipedia.Page.imagelinks"         : "_wikipedia_Page_imagelinks",
             "wikipedia.Page.templates"          : "_wikipedia_Page_templates",
-            "wikipedia.Page.templatePages"      : "_wikipedia_Page_templatePages"     
-            "wikipedia.Page.getVersionHistory"  : "_wikipedia_Page_getVersionHistory"    
+            "wikipedia.Page.templatePages"      : "_wikipedia_Page_templatePages",    
+            "wikipedia.Page.getVersionHistory"  : "_wikipedia_Page_getVersionHistory",
+            "wikipedia.Page.fullVersionHistory" : "_wikipedia_Page_fullVersionHistory"
           }
 
 monkeypatch.patch(patches, globals(), locals())
