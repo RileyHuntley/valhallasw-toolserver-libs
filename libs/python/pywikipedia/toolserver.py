@@ -44,8 +44,8 @@ class _tests:
                     FROM %s.page
                     WHERE page_title=%%s AND page_namespace=%%s
                 ) AND tl_title=%%s AND tl_namespace=%%s """ % ((page.site().dbName(),)*2)
-        res = query(q, (  page.titleWithoutNamespace(True),   page.namespace(),
-                        inpage.titleWithoutNamespace(True), inpage.namespace()))
+        res = query(q, (  page.titleWithoutNamespace(True).encode('utf-8'),   page.namespace(),
+                        inpage.titleWithoutNamespace(True).encode('utf-8'), inpage.namespace()))
         return (len(res) > 0)
 
     def isRedirectTo(self, frompage, topage):
@@ -57,8 +57,8 @@ class _tests:
                     WHERE page_title=%%s AND page_namespace=%%s
                 ) AND rd_title=%%s AND rd_namespace=%%s
                 LIMIT 1 """ % ((frompage.site().dbName(),)*2)  #what do interlanguage redirects look like?
-        res = query(q, (frompage.titleWithoutNamespace(True), frompage.namespace(),
-                          topage.titleWithoutNamespace(True),   topage.namespace()) )
+        res = query(q, (frompage.titleWithoutNamespace(True).encode('utf-8'), frompage.namespace(),
+                          topage.titleWithoutNamespace(True).encode('utf-8'),   topage.namespace()) )
         return (len(res) > 0)
     
     def exists(self, page):
@@ -66,7 +66,7 @@ class _tests:
                 FROM %s.page
                 WHERE page_title=%%s AND page_namespace=%%s
                 LIMIT 1 """ % page.site().dbName()
-        res = query(q, (page.titleWithoutNamespace(True), page.namespace()))
+        res = query(q, (page.titleWithoutNamespace(True).encode('utf-8'), page.namespace()))
         return (len(res) > 0)
 
 class _generators:
@@ -74,7 +74,7 @@ class _generators:
     def _generate(self, q, min, step, params, allowNone = False):
         more = True
         q += " LIMIT %s, %s"
-        
+
         if (type(params) != type((min, step))):
             params = (params, )
          
@@ -99,7 +99,7 @@ class _generators:
                     FROM %s.page
                     WHERE page_title=%%s AND page_namespace=%%s) """ % ((page.site().dbName(), )*2)
         q += sort           
-        for row in self._generate(q, min, step, (page.titleWithoutNamespace(True), page.namespace())):
+        for row in self._generate(q, min, step, (page.titleWithoutNamespace(True).encode('utf-8'), page.namespace())):
             yield wikipedia.Page(page.site(), row['pl_title'].decode('utf-8'), page.site(), row['pl_namespace'])
  
     def getTemplatelinks(self, page, min=0, step=50, sort=""):
@@ -110,7 +110,7 @@ class _generators:
                     FROM %s.page
                     WHERE page_title=%%s AND page_namespace=%%s) """ % ((page.site().dbName(), )*2)
         q += sort
-        for row in self._generate(q, min, step, (page.titleWithoutNamespace(True), page.namespace())):
+        for row in self._generate(q, min, step, (page.titleWithoutNamespace(True).encode('utf-8'), page.namespace())):
             yield wikipedia.Page(page.site(), row['tl_title'].decode('utf-8'), page.site(), row['tl_namespace'])   
                      
     def getLanglinks(self, page, min=0, step=50, sort=""):
@@ -121,7 +121,7 @@ class _generators:
                     FROM %s.page
                     WHERE page_title=%%s AND page_namespace=%%s) """ % ((page.site().dbName(), )*2)
         q += sort
-        for row in self._generate(q, min, step, (page.titleWithoutNamespace(True), page.namespace())):
+        for row in self._generate(q, min, step, (page.titleWithoutNamespace(True).encode('utf-8'), page.namespace())):
             yield wikipedia.Page(wikipedia.Site(row['ll_lang']), row['ll_title'].decode('utf-8'), page.site())
 
     def getCategorylinks(self, page, min=0, step=50, sort=""):
@@ -132,7 +132,7 @@ class _generators:
                     FROM %s.page
                     WHERE page_title=%%s AND page_namespace=%%s) """ % ((page.site().dbName(), )*2)
         q += sort
-        for row in self._generate(q, min, step, (page.titleWithoutNamespace(True), page.namespace())):
+        for row in self._generate(q, min, step, (page.titleWithoutNamespace(True).encode('utf-8'), page.namespace())):
             yield catlib.Category(page.site(), page.site().category_namespace() + ':' + row['cl_to'].decode('utf-8'), page.site(), row['cl_sortkey'].decode('utf-8'))
 
     def getImagelinks(self, page, min=0, step=50, sort=""):    
@@ -143,7 +143,7 @@ class _generators:
                     FROM %s.page
                     WHERE page_title=%%s AND page_namespace=%%s) """ % ((page.site().dbName(), )*2)
         q += sort
-        for row in self._generate(q, min, step, (page.titleWithoutNamespace(True), page.namespace())):
+        for row in self._generate(q, min, step, (page.titleWithoutNamespace(True).encode('utf-8'), page.namespace())):
             yield wikipedia.ImagePage(page.site(), page.site().image_namespace() + ":" + row['il_to'].decode('utf-8'), page.site()) 
     
     def getRedirect(self, page, min=0, step=50, sort=""):
@@ -154,7 +154,7 @@ class _generators:
                     FROM %s.page
                     WHERE page_title=%%s AND page_namespace=%%s) """ % ((page.site().dbName(), )*2)
         q += sort
-        for row in self._generate(q, min, step, (page.titleWithoutNamespace(True), page.namespace())):
+        for row in self._generate(q, min, step, (page.titleWithoutNamespace(True).encode('utf-8'), page.namespace())):
             yield wikipedia.Page(page.site(), row['rd_title'].decode('utf-8'), page.site(), row['rd_namespace'])   
     
     def getRevision(self, page, min=0, step=50, format='%Y%m%d%H%M%S', sort="ORDER BY rev_id DESC"):
@@ -165,14 +165,25 @@ class _generators:
                     FROM %s.page
                     WHERE page_title=%%s AND page_namespace=%%s) """ % ((page.site().dbName(), )*2)
         q += sort
-        for row in self._generate(q, min, step, (page.titleWithoutNamespace(True), page.namespace())):
+        for row in self._generate(q, min, step, (page.titleWithoutNamespace(True).encode('utf-8'), page.namespace())):
             date = time.strftime(format, time.strptime(row['rev_timestamp'], "%Y%m%d%H%M%S"))
             yield { 'revision'  :   row['rev_id'],
                     'comment'   :   row['rev_comment'].tostring().decode('utf-8'),
                     'user'      :   row['rev_user_text'].decode('utf-8'),
                     'date'      :   date
                   }
-    
+  
+    def getExternallinks(self, page, min=0, step=50, sort=""):
+        q = """ SELECT el_to
+                FROM %s.externallinks
+                WHERE el_from=(
+                    SELECT page_id
+                    FROM %s.page
+                    WHERE page_title=%%s AND page_namespace=%%s) """ % ((page.site().dbName(), ) *2)
+        q += sort
+        for row in self._generate(q, min, step, (page.titleWithoutNamespace(True).encode('utf-8'), page.namespace())):
+            yield row['el_to'].tostring().decode('utf-8')
+  
     ########################### BACKWARD GENERATORS (page_ns/title -> otherpage_id)
     def getReferences(self, page, min=0, step=50):
         q = """ SELECT page_namespace, page_title
@@ -181,7 +192,7 @@ class _generators:
                 ON page_id = pl_from
                 WHERE pl_title=%%s AND pl_namespace=%%s """ % ((page.site().dbName(), )*2)
     
-        for row in self._generate(q, min, step, (page.titleWithoutNamespace(True), page.namespace())):
+        for row in self._generate(q, min, step, (page.titleWithoutNamespace(True).encode('utf-8'), page.namespace())):
             yield wikipedia.Page(page.site(), row['page_title'].decode('utf-8'), page.site(), row['page_namespace'])
 
     def getInclusions(self, page, min=0, step=50):
@@ -192,7 +203,7 @@ class _generators:
                     WHERE tl_title=%%s and tl_namespace=%%s 
                     LIMIT %%s, %%s""" % ((page.site().dbName(),)*2)
         
-        for row in self._generate(q, min, step, (page.titleWithoutNamespace(True), page.namespace())):
+        for row in self._generate(q, min, step, (page.titleWithoutNamespace(True).encode('utf-8'), page.namespace())):
             yield wikipedia.Page(page.site(), row['page_title'].decode('utf-8'), page.site(), row['page_namespace'])
     
     def getCategoryMembers(self, page, min=0, step=50):
@@ -205,7 +216,7 @@ class _generators:
                 ON page_id = cl_from
                 WHERE cl_to=%%s """ % ((page.site().dbName(), )*2)
         
-        for row in self._generate(q, min, step, page.titleWithoutNamespace(True)):
+        for row in self._generate(q, min, step, page.titleWithoutNamespace(True).encode('utf-8')):
             if (row['page_namespace'] == 14):
                 yield catlib.Category(page.site(), page.site().category_namespace() + ':' + row['page_title'].decode('utf-8'), page.site())
             else:
