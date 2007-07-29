@@ -1,3 +1,9 @@
+""" IRC Recent changes to TCP gateway """
+#
+# (C) 2007 Merlijn 'valhallasw' van Deen
+#
+# Licensed under the terms of the MIT license
+#
 
 import re
 __version__ = "$Id$"
@@ -23,7 +29,7 @@ class RCBot(tcp.protocols.irc.IRCClient):
     realname = "Toolserver RC relay bot [[docpage]]"
     username = "tsrcrelay"
     versionName = "Toolserver RC relay bot"
-    versionNum = '%s (%s)' % (__versiondict__['revision'], __versiondict__['date'])
+    versionNum = 'r%s (%s)' % (__versiondict__['revision'], __versiondict__['date'])
     
     def __init__(self):
         bot.updatechannels = self.updatechannels
