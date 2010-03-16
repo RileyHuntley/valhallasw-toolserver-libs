@@ -1,10 +1,13 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/2002/REC-xhtml1-20020801/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
     <title>PyWikipediaBot Nightlies</title>
-    <link rel="stylesheet" href="/~valhallasw/main.css" />
+    <link rel="stylesheet" href="/~valhallasw/.style/main.css" />
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
   </head>
   <body>
+  <div class="body">
     <h1>PyWikipediaBot Nightlies</h1>
     <h2>Nightly downloads</h2>
     <p>The nightlies are generated every night at 20:00 UTC. There are several packages:</p>
@@ -14,26 +17,30 @@
       $gendate = fgets($file);
       $package = rtrim(fgets($file));
       while (!feof($file)) {
-        print '<h3>'.$package.'</h3><div style="margin-left: 3em; margin-right: 20%;">';
+        print '<h3>'.$package.' [<a href="package/'.$package.'/'.$package.'-nightly.tar.bz2">download</a>]</h3>';
+	include('package/'.$package.'/README');
+	print '<div style="margin-left: 3em; margin-right: 20%;">';
+	print '<h4>Latest revision in this nightly</h4>';
         print '<pre>';
         include('log/'.$package.'/latest.log');
         print '</pre>';
-        print '<ul><li>The <a href="log/'.$package.'/svn.log">svn update log</a> and latest <a href="log/'.$package.'/latest.log">commit log</a></li>';
-      
-        print '<li>The compression logs:';
-        print '<ul>';
-        print '<li><a href="log/'.$package.'/tar.bz2.log">bzip2</a></li>';
-        print '<li><a href="log/'.$package.'/tgz.log">gzip2</a></li>';
-        print '<li><a href="log/'.$package.'/zip.log">zip</a></li>';
-        print '</ul>or alternatively, browse the <a href="log/'.$package.'">'.$package.'log directory</a></li>';
-      
-        print '<li>The packages:';
-        print '<ul>';
+
+	print '<h4>Downloads</h4>';
+	print '<ul>';
         print '<li><a href="package/'.$package.'/'.$package.'-nightly.tar.bz2">'.$package.'-nightly.tar.bz2</a></li>';
         print '<li><a href="package/'.$package.'/'.$package.'-nightly.tgz">'.$package.'-nightly.tgz</a></li>';
         print '<li><a href="package/'.$package.'/'.$package.'-nightly.zip">'.$package.'-nightly.zip</a></li>';
-        print '</ul>or alternatively, browse the <a href="log/'.$package.'">'.$package.' package directory</a></li>';
-        print '</ul></div>';
+        print '</ul>or alternatively, browse the <a href="package/'.$package.'">'.$package.' package directory</a>';
+      
+        print '<h4>Logs</h4>';
+        print '<ul>';
+        print '<li>The <a href="log/'.$package.'/svn.log">svn update log</a> and latest <a href="log/'.$package.'/latest.log">commit log</a></li>';
+        print '<li><a href="log/'.$package.'/tar.bz2.log">bzip2</a></li>';
+        print '<li><a href="log/'.$package.'/tgz.log">gzip2</a></li>';
+        print '<li><a href="log/'.$package.'/zip.log">zip</a></li>';
+        print '</ul>or alternatively, browse the <a href="log/'.$package.'">'.$package.' log directory</a>';
+        
+	print '</div>';
         $package = rtrim(fgets($file));
       }
     ?><!-- end automagically created stuff -->
@@ -57,7 +64,7 @@
       </li>
       <li>
         Q: I want to stay updated<br/>
-        A: Subscribe to the <a href="http://lists.wikimedia.org/mailmain/pywikipedia-l">mailing list</a>, join us on <a           href="irc://irc.freenode.net/pywikipediabot">IRC</a>.
+        A: Subscribe to the <a href="https://lists.wikimedia.org/mailman/listinfo/pywikipedia-l">mailing list</a>, join us on <a           href="irc://irc.freenode.net/pywikipediabot">IRC</a>.
       </li>
     </ul>
     <div>
@@ -70,5 +77,6 @@
         Latest pywikipedia nightly was generated at: <? echo $gendate; ?><br/>Web site revision: $Id$
       </p>
     </div>
+  </div>
   </body>
 </html>
