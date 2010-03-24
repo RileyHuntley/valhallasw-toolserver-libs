@@ -20,36 +20,28 @@
         print '<h3>'.$package.' [<a href="package/'.$package.'/'.$package.'-nightly.tar.bz2">download</a>]</h3>';
 	include('package/'.$package.'/README');
 	print '<div style="margin-left: 3em; margin-right: 20%;">';
-	print '<h4>Latest revision in this nightly</h4>';
+	print '<h4>Last incorporated revision</h4>';
         print '<pre>';
         include('log/'.$package.'/latest.log');
         print '</pre>';
+	print '<a href="log/'.$package.'/svn.log">svn update log</a>';
 
 	print '<h4>Downloads</h4>';
 	print '<ul>';
-        print '<li><a href="package/'.$package.'/'.$package.'-nightly.tar.bz2">'.$package.'-nightly.tar.bz2</a></li>';
-        print '<li><a href="package/'.$package.'/'.$package.'-nightly.tgz">'.$package.'-nightly.tgz</a></li>';
-        print '<li><a href="package/'.$package.'/'.$package.'-nightly.zip">'.$package.'-nightly.zip</a></li>';
+	
+	foreach (array('7z', 'tar.bz2', 'tgz', 'zip') as $ext) {
+	  $filename = 'package/'.$package.'/'.$package.'-nightly.'.$ext;
+	  $log = 'log/'.$package.'/'.$ext.'.log';
+	  print '<li><a href="'.$filename.'">'.$filename.'</a> <small>(' . round(filesize($filename)/1024) . ' KiB, <a href="' . $log . '">log</a>)</small></li>';
+	}
         print '</ul>or alternatively, browse the <a href="package/'.$package.'">'.$package.' package directory</a>';
-      
-        print '<h4>Logs</h4>';
-        print '<ul>';
-        print '<li>The <a href="log/'.$package.'/svn.log">svn update log</a> and latest <a href="log/'.$package.'/latest.log">commit log</a></li>';
-        print '<li><a href="log/'.$package.'/tar.bz2.log">bzip2</a></li>';
-        print '<li><a href="log/'.$package.'/tgz.log">gzip2</a></li>';
-        print '<li><a href="log/'.$package.'/zip.log">zip</a></li>';
-        print '</ul>or alternatively, browse the <a href="log/'.$package.'">'.$package.' log directory</a>';
-        
+       
 	print '</div>';
         $package = rtrim(fgets($file));
       }
     ?><!-- end automagically created stuff -->
     <h2>FAQ</h2>
     <ul>
-      <li>
-        Q: What are those nasty CVS/ directories for?<br/>
-        A: I am too lazy to no pack them and it's useable for people too lazy to do a normal checkout. This allows people to use - for example - <a href="http://www.tortoisecvs.org">TortoiseCVS</a> without filling any scary forms. And it only takes 10 kB anyway.
-      </li>
       <li>
         Q: How can I use the framework?<br/>
         A: Read the <a href="http://meta.wikimedia.org/wiki/Using_the_python_wikipediabot">manual</a>
